@@ -1,4 +1,4 @@
-# AI Financial Advisor 💰
+# AI Financial Advisor
 
 A full-stack, mildly gentle AI Financial Advisor built for the Gemma 4 Good Hackathon. 
 
