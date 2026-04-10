@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Financial Advisor</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .dashboard { background-color: #1e293b; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: 100%; max-width: 500px; }
+        h2 { text-align: center; margin-top: 0; }
+        .input-group { display: flex; gap: 10px; margin-bottom: 10px; }
+        input, select { padding: 10px; border-radius: 5px; border: none; background-color: #334155; color: white; width: 100%; }
+        .add-btn { background-color: #10b981; width: auto; margin-top: 0; padding: 10px 20px; }
+        button { background-color: #3b82f6; color: white; border: none; padding: 15px; font-size: 16px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 15px; }
+        button:hover { opacity: 0.9; }
+        .expense-list { background-color: #0f172a; padding: 10px; border-radius: 8px; margin-bottom: 20px; min-height: 50px; font-size: 14px; }
+        .results { display: none; margin-top: 20px; }
+        .data-box { background-color: #334155; padding: 15px; border-radius: 8px; font-family: monospace; white-space: pre-wrap; }
+        .ai-box { background-color: #10b981; color: white; padding: 15px; border-radius: 8px; font-weight: bold; margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <h2>AI Financial Advisor</h2>
+        
+        <div class="input-group">
+            <input type="text" id="descInput" placeholder="What did you buy?">
+            <input type="number" id="amtInput" placeholder="₹ Amount">
+        </div>
+        
+        <div class="input-group">
+            <select id="catInput">
+                <option value="Dining">Dining</option>
+                <option value="Groceries">Groceries</option>
+                <option value="Entertainment">Entertainment</option>
+                <option value="Transport">Transport</option>
+                <option value="Housing">Housing</option>
+            </select>
+            <button class="add-btn" onclick="addExpense()">Add</button>
+        </div>
+
+        <div class="expense-list" id="expenseList"></div>
+        
+        <button id="analyzeBtn" onclick="analyzeData()">Analyze My Finances</button>
+
+        <div id="resultsArea" class="results">
+            <h3>The Data:</h3>
+            <div id="dataSummary" class="data-box"></div>
+            
+            <h3>The Verdict:</h3>
+            <div id="aiAdvice" class="ai-box"></div>
+        </div>
+    </div>
+
+    <script>
+        let myExpenses = [
+            {"description": "Apartment Rent", "amount": 15000, "category": "Housing"},
+            {"description": "Supermarket Groceries", "amount": 3200, "category": "Groceries"},
+            {"description": "Electricity Bill", "amount": 1200, "category": "Housing"},
+            {"description": "Netflix Subscription", "amount": 500, "category": "Entertainment"},
+            {"description": "Metro Train Pass", "amount": 800, "category": "Transport"},
+            {"description": "Restaurant Dinner", "amount": 1500, "category": "Dining"}
+        ];
+
+        function addExpense() {
+            let desc = document.getElementById('descInput').value;
+            let amt = document.getElementById('amtInput').value;
+            let cat = document.getElementById('catInput').value;
+
+            if (!desc || !amt) {
+                alert("Please fill in both description and amount!");
+                return;
+            }
+
+            myExpenses.push({
+                "description": desc,
+                "amount": parseFloat(amt),
+                "category": cat
+            });
+
+            updateScreenList();
+            
+            document.getElementById('descInput').value = '';
+            document.getElementById('amtInput').value = '';
+        }
+
+        function updateScreenList() {
+            let listHTML = "";
+            myExpenses.forEach(item => {
+                listHTML += `<div>- ${item.description} : ₹${item.amount} (${item.category})</div>`;
+            });
+            document.getElementById('expenseList').innerHTML = listHTML;
+        }
+
+        async function analyzeData() {
+            if (myExpenses.length === 0) {
+                alert("Add some expenses first!");
+                return;
+            }
+
+            const btn = document.getElementById('analyzeBtn');
+            btn.innerText = "Analyzing... Please wait...";
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ expenses: myExpenses })
+                });
+                
+                const data = await response.json();
+
+                document.getElementById('dataSummary').innerText = data.data_summary;
+                document.getElementById('aiAdvice').innerText = data.ai_advice;
+                document.getElementById('resultsArea').style.display = 'block';
+                
+            } catch (error) {
+                alert("Error! Is the Python server running?");
+            }
+
+            btn.innerText = "Analyze My Finances";
+            btn.disabled = false;
+        }
+
+        updateScreenList();
+    </script>
+</body>
+</html>
