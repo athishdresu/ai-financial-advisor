@@ -1,9 +1,9 @@
 from flask import Flask, jsonify, render_template, request
 import pandas as pd
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 
-genai.configure(api_key="YOUR_API_KEY_HERE")
-model = genai.GenerativeModel('gemma-4-31b-it')
+client = genai.Client(api_key="YOUR_NEW_API_KEY_HERE")
 
 app = Flask(__name__)
 
@@ -31,9 +31,10 @@ def analyze_finances():
     
     system_prompt = f"Analyze this financial data:\n{summary}\n\nYou must provide exactly two sentences: a sweet compliment, and an easy saving tip. You can write out your internal thoughts first, but you MUST put your final two sentences at the very end after the exact word FINAL_ANSWER:"
 
-    response = model.generate_content(
-        system_prompt,
-        generation_config=genai.types.GenerationConfig(temperature=0.1)
+    response = client.models.generate_content(
+        model='gemma-4-31b-it',
+        contents=system_prompt,
+        config=types.GenerateContentConfig(temperature=0.1)
     )
     
     clean_advice = response.text.split("FINAL_ANSWER:")[-1].replace("*", "").strip()
