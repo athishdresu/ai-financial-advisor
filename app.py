@@ -22,10 +22,17 @@ def home():
 
 @app.route('/api/analyze', methods=['POST'])
 def analyze_finances():
-    live_data = request.json.get('expenses')
+    if 'file' not in request.files:
+        return jsonify({"status": "error", "message": "No file uploaded!"})
+        
+    file = request.files['file']
+    df = pd.read_csv(file)
+    df.columns = df.columns.str.lower()
+    
+    live_data = df.to_dict(orient='records')
     
     if not live_data or len(live_data) == 0:
-        return jsonify({"status": "error", "message": "No data provided!"})
+        return jsonify({"status": "error", "message": "No data provided in CSV!"})
         
     summary = financial_summary(live_data)
     
