@@ -1,12 +1,12 @@
 import os
+import pandas as pd
 import google.generativeai as genai
 from flask import Flask, jsonify, render_template, request
-import pandas as pd
-from google import genai
-from google.genai import types
+
+# This securely grabs the key from Render's Environment Variables!
 my_api_key = os.environ.get("GOOGLE_API_KEY")
 genai.configure(api_key=my_api_key)
-client = genai.Client(api_key="YOUR_NEW_API_KEY_HERE")
+model = genai.GenerativeModel('gemma-4-31b-it')
 
 app = Flask(__name__)
 
